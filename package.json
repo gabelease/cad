@@ -1,0 +1,23 @@
+{
+  "name": "cad",
+  "version": "1.0.0",
+  "description": "",
+  "main": "testModal.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gabelease/cad.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/gabelease/cad/issues"
+  },
+  "homepage": "https://github.com/gabelease/cad#readme",
+  "dependencies": {
+    "replicad": "^0.20.0",
+    "typescript": "^5.9.2"
+  }
+}
