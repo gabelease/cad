@@ -1,14 +1,21 @@
 const defaultParams = {};
 
-const HULL_LENGTH = 250;
-const HULL_WIDTH = HULL_LENGTH * 0.15;
-const WIDE_POINT = 0.6;
+const HULL_LENGTH = 200;
+const HULL_WIDTH = 30;
+const WIDE_POINT = 0.66;
 
 const HullCurve1 = {
   startPoint: [0, 0],
-  startControlPoint: [HULL_LENGTH * 0.2, HULL_WIDTH * 0.2],
+  startControlPoint: [HULL_LENGTH * 0.3, HULL_WIDTH * 0.2],
+  endPoint: [HULL_LENGTH * WIDE_POINT, HULL_WIDTH * 0.5],
+  endControlPoint: [HULL_LENGTH * 0.4, HULL_WIDTH * 0.5],
+};
+
+const HullCurve2 = {
+  startPoint: [HULL_LENGTH * WIDE_POINT, HULL_WIDTH * 0.5],
+  startControlPoint: [HULL_LENGTH * 0.8, HULL_WIDTH * 0.5],
   endPoint: [HULL_LENGTH, 0],
-  endControlPoint: [HULL_LENGTH * 0.8, HULL_WIDTH * 0.3],
+  endControlPoint: [HULL_LENGTH * 0.9, HULL_WIDTH * 0.1],
 };
 
 const HULL_HEIGHT = 15;
@@ -52,13 +59,19 @@ function main({ draw, drawEllipse, drawCircle }, {}) {
   //   [-HULL_LENGTH * 0.3, -HULL_WIDTH * 0.3],
   //   [-HULL_LENGTH * 0.5, 0],
   // ];
-  let hull = draw(HullCurve1.startPoint).cubicBezierCurveTo(HullCurve1.endPoint, HullCurve1.startControlPoint, HullCurve1.endControlPoint).closeWithMirror();
+  let hull = draw(HullCurve1.startPoint)
+    .cubicBezierCurveTo(HullCurve1.endPoint, HullCurve1.startControlPoint, HullCurve1.endControlPoint)
+    .cubicBezierCurveTo(HullCurve2.endPoint, HullCurve2.startControlPoint, HullCurve2.endControlPoint)
+    .closeWithMirror();
 
   const controlPoints = [
     drawCircle(1.5).translate(HullCurve1.startPoint),
     drawCircle(1.5).translate(HullCurve1.startControlPoint),
     drawCircle(1.5).translate(HullCurve1.endControlPoint),
     drawCircle(1.5).translate(HullCurve1.endPoint),
+    drawCircle(1.5).translate(HullCurve2.startControlPoint),
+    drawCircle(1.5).translate(HullCurve2.endControlPoint),
+    drawCircle(1.5).translate(HullCurve2.endPoint),
   ];
 
   // hull = hull.sketchOnPlane().extrude(HULL_HEIGHT);
