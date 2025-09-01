@@ -4,6 +4,13 @@ const HULL_LENGTH = 250;
 const HULL_WIDTH = HULL_LENGTH * 0.15;
 const WIDE_POINT = 0.6;
 
+const HullCurve1 = {
+  startPoint: [0, 0],
+  startControlPoint: [HULL_LENGTH * 0.2, HULL_WIDTH * 0.2],
+  endPoint: [HULL_LENGTH, 0],
+  endControlPoint: [HULL_LENGTH * 0.8, HULL_WIDTH * 0.3],
+};
+
 const HULL_HEIGHT = 15;
 
 const FIN_LENGTH = 15;
@@ -29,52 +36,69 @@ const SHAFT_RADIUS = SHAFT_DIAMETER / 2;
 
 /** @typedef { typeof import("replicad") } replicadLib */
 /** @type {function(replicadLib, typeof defaultParams): any} */
-async function main({ draw, drawEllipse, drawCircle, importSTL }, {}) {
-  let hull = draw([-HULL_LENGTH * 0.5, 0]);
+function main({ draw, drawEllipse, drawCircle }, {}) {
+  // const hullPoints = [
+  //   [-HULL_LENGTH * 0.5, 0],
+  //   [-HULL_LENGTH * 0.3, HULL_WIDTH * 0.3],
+  //   [-HULL_LENGTH * 0.1, HULL_WIDTH * 0.45],
+  //   [HULL_LENGTH * WIDE_POINT - HULL_LENGTH * 0.5, HULL_WIDTH * 0.5],
+  //   [HULL_LENGTH * 0.3, HULL_WIDTH * 0.4],
+  //   [HULL_LENGTH * 0.45, HULL_WIDTH * 0.1],
+  //   [HULL_LENGTH * 0.5, 0],
+  //   // [HULL_LENGTH * 0.45, -HULL_WIDTH * 0.1],
+  //   [HULL_LENGTH * 0.3, -HULL_WIDTH * 0.4],
+  //   [HULL_LENGTH * WIDE_POINT - HULL_LENGTH * 0.5, -HULL_WIDTH * 0.5],
+  //   [-HULL_LENGTH * 0.1, -HULL_WIDTH * 0.45],
+  //   [-HULL_LENGTH * 0.3, -HULL_WIDTH * 0.3],
+  //   [-HULL_LENGTH * 0.5, 0],
+  // ];
+  let hull = draw(HullCurve1.startPoint).cubicBezierCurveTo(HullCurve1.endPoint, HullCurve1.startControlPoint, HullCurve1.endControlPoint).closeWithMirror();
 
-  hull = hull.smoothSpline(HULL_LENGTH * WIDE_POINT, HULL_WIDTH * 0.5, { endTangent: [1, 0], startFactor: 1 });
-  hull = hull.smoothSpline(HULL_LENGTH * (1 - WIDE_POINT), HULL_WIDTH * -0.5, { endTangent: [1, 0], startFactor: 1 });
+  const controlPoints = [
+    drawCircle(1.5).translate(HullCurve1.startPoint),
+    drawCircle(1.5).translate(HullCurve1.startControlPoint),
+    drawCircle(1.5).translate(HullCurve1.endControlPoint),
+    drawCircle(1.5).translate(HullCurve1.endPoint),
+  ];
 
-  hull = hull.closeWithMirror();
+  // hull = hull.sketchOnPlane().extrude(HULL_HEIGHT);
 
-  hull = hull.sketchOnPlane().extrude(HULL_HEIGHT);
+  // hull = hull.fillet(1, (e) => e.inDirection("Z"));
 
-  hull = hull.fillet(1, (e) => e.inDirection("Z"));
+  // hull = hull.fillet(1.9, (e) => e.inPlane("XY", 0));
 
-  hull = hull.fillet(1.9, (e) => e.inPlane("XY", 0));
+  // let frontFin = drawEllipse(FIN_LENGTH, FIN_WIDTH);
+  // frontFin = frontFin.sketchOnPlane().extrude(FIN_HEIGHT);
+  // frontFin = frontFin.translate([FRONT_FIN_OFFSET, 0]);
 
-  let frontFin = drawEllipse(FIN_LENGTH, FIN_WIDTH);
-  frontFin = frontFin.sketchOnPlane().extrude(FIN_HEIGHT);
-  frontFin = frontFin.translate([FRONT_FIN_OFFSET, 0]);
+  // let backFin = drawEllipse(FIN_LENGTH, FIN_WIDTH);
+  // backFin = backFin.sketchOnPlane().extrude(FIN_HEIGHT);
+  // backFin = backFin.translate([BACK_FIN_OFFSET, 0]);
 
-  let backFin = drawEllipse(FIN_LENGTH, FIN_WIDTH);
-  backFin = backFin.sketchOnPlane().extrude(FIN_HEIGHT);
-  backFin = backFin.translate([BACK_FIN_OFFSET, 0]);
+  // let dummyProp = drawCircle(PROP_RADIUS);
+  // dummyProp = dummyProp.sketchOnPlane("YZ");
+  // dummyProp = dummyProp.extrude(PROP_THICKNESS).fillet(3);
 
-  let dummyProp = drawCircle(PROP_RADIUS);
-  dummyProp = dummyProp.sketchOnPlane("YZ");
-  dummyProp = dummyProp.extrude(PROP_THICKNESS).fillet(3);
+  // const backPosition = HULL_LENGTH * 0.5 - PROP_THICKNESS / 2;
+  // dummyProp = dummyProp.translate([backPosition, 0, BORE_HEIGHT]);
 
-  const backPosition = HULL_LENGTH * 0.5 - PROP_THICKNESS / 2;
-  dummyProp = dummyProp.translate([backPosition, 0, BORE_HEIGHT]);
+  // let boreDriller = drawCircle(BORE_RADIUS);
+  // boreDriller = boreDriller.sketchOnPlane("YZ");
+  // boreDriller = boreDriller.extrude(HULL_LENGTH * 0.3);
+  // boreDriller = boreDriller.translate([HULL_LENGTH * 0.15, 0, BORE_HEIGHT]);
 
-  let boreDriller = drawCircle(BORE_RADIUS);
-  boreDriller = boreDriller.sketchOnPlane("YZ");
-  boreDriller = boreDriller.extrude(HULL_LENGTH * 0.3);
-  boreDriller = boreDriller.translate([HULL_LENGTH * 0.15, 0, BORE_HEIGHT]);
+  // let rubberBandPropClip = drawCircle(SHAFT_RADIUS);
+  // rubberBandPropClip = rubberBandPropClip.sketchOnPlane("YZ");
+  // rubberBandPropClip = rubberBandPropClip.extrude(FIN_LENGTH);
+  // const shaftPosition = BACK_FIN_OFFSET - FIN_LENGTH * 3;
+  // rubberBandPropClip = rubberBandPropClip.translate([shaftPosition, 0, BORE_HEIGHT]);
+  // rubberBandPropClip = rubberBandPropClip.fillet(SHAFT_RADIUS, (e) => e.inPlane("YZ", shaftPosition));
 
-  let rubberBandPropClip = drawCircle(SHAFT_RADIUS);
-  rubberBandPropClip = rubberBandPropClip.sketchOnPlane("YZ");
-  rubberBandPropClip = rubberBandPropClip.extrude(FIN_LENGTH);
-  const shaftPosition = BACK_FIN_OFFSET - FIN_LENGTH * 3;
-  rubberBandPropClip = rubberBandPropClip.translate([shaftPosition, 0, BORE_HEIGHT]);
-  rubberBandPropClip = rubberBandPropClip.fillet(SHAFT_RADIUS, (e) => e.inPlane("YZ", shaftPosition));
+  // let boatBody = hull.fuse(frontFin).fuse(backFin);
+  // boatBody = boatBody.cut(boreDriller);
+  // dummyProp = dummyProp.cut(boreDriller);
 
-  let boatBody = hull.fuse(frontFin).fuse(backFin);
-  boatBody = boatBody.cut(boreDriller);
-  dummyProp = dummyProp.cut(boreDriller);
-
-  const components = [boatBody, dummyProp, rubberBandPropClip];
+  const components = [hull, ...controlPoints];
 
   console.log("model updated at ", new Date().getTime());
 
