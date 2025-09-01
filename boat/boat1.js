@@ -28,7 +28,7 @@ const FIN_SLOPE = 0.5;
 const FRONT_FIN_OFFSET = HULL_LENGTH * 0.25;
 const BACK_FIN_OFFSET = HULL_LENGTH * 0.85;
 
-const PROP_SCALE = 0.66;
+const PROP_SCALE = 0.75;
 
 const PROP_DIAMETER = 60 * PROP_SCALE;
 const PROP_THICKNESS = 18 * PROP_SCALE;
@@ -37,7 +37,7 @@ const PROP_RADIUS = PROP_DIAMETER / 2;
 const BORE_HEIGHT = FIN_HEIGHT * 0.85;
 const FRONT_NOTCH_RADIUS = 4;
 const FRONT_NOTCH_OFFSET = 2;
-const BACK_NOTCH_OFFSET = 6;
+const BACK_NOTCH_OFFSET = 8;
 const BACK_NOTCH_HEIGHT = 11;
 
 const BORE_DIAMETER = 3 * PROP_SCALE;
@@ -119,15 +119,19 @@ function main({ draw, drawEllipse, drawCircle, makeSphere }, {}) {
   let rubberBandPropClip = drawCircle(SHAFT_RADIUS);
   rubberBandPropClip = rubberBandPropClip.sketchOnPlane("YZ");
   rubberBandPropClip = rubberBandPropClip
-    .extrude(-FIN_LENGTH)
-    .fillet(SHAFT_RADIUS, (e) => e.inPlane("YZ", -FIN_LENGTH))
+    .extrude(-FIN_LENGTH * 1.5)
+    .fillet(4, (e) => e.inPlane("YZ", -FIN_LENGTH * 1.5))
     .fillet(SHAFT_RADIUS * 0.5, (e) => e.inPlane("YZ", 0));
+
+  let rubberBandClipHole = drawCircle(2).sketchOnPlane("XY").extrude(20).translate([-15, 0, -10]);
+  rubberBandPropClip = rubberBandPropClip.cut(rubberBandClipHole);
+
   // let clipHole = drawCircle(BORE_RADIUS)
   //   .sketchOnPlane("YZ")
   //   .extrude(-FIN_LENGTH * 1);
   // rubberBandPropClip = rubberBandPropClip.cut(clipHole);
 
-  // const shaftPosition = BACK_FIN_OFFSET - FIN_LENGTH * 3;
+  const shaftPosition = BACK_FIN_OFFSET - FIN_LENGTH * 3;
   rubberBandPropClip = rubberBandPropClip.translate([BACK_FIN_OFFSET + FIN_LENGTH - BACK_NOTCH_OFFSET, 0, -BORE_HEIGHT]).cut(boreDriller);
   // rubberBandPropClip = rubberBandPropClip.fillet(SHAFT_RADIUS, (e) => e.inPlane("YZ", shaftPosition));
 
@@ -136,8 +140,7 @@ function main({ draw, drawEllipse, drawCircle, makeSphere }, {}) {
   dummyProp = dummyProp.cut(boreDriller);
 
   // const components = [hull, ...controlPoints];
-  const components = [boatBody, rubberBandPropClip];
-
+  const components = [rubberBandPropClip];
   console.log("model updated at ", new Date().getTime());
 
   return components;
