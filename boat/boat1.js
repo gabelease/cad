@@ -47,21 +47,6 @@ const SHAFT_RADIUS = SHAFT_DIAMETER / 2;
 /** @typedef { typeof import("replicad") } replicadLib */
 /** @type {function(replicadLib, typeof defaultParams): any} */
 function main({ draw, drawEllipse, drawCircle, makeSphere }, {}) {
-  // const hullPoints = [
-  //   [-HULL_LENGTH * 0.5, 0],
-  //   [-HULL_LENGTH * 0.3, HULL_WIDTH * 0.3],
-  //   [-HULL_LENGTH * 0.1, HULL_WIDTH * 0.45],
-  //   [HULL_LENGTH * WIDE_POINT - HULL_LENGTH * 0.5, HULL_WIDTH * 0.5],
-  //   [HULL_LENGTH * 0.3, HULL_WIDTH * 0.4],
-  //   [HULL_LENGTH * 0.45, HULL_WIDTH * 0.1],
-  //   [HULL_LENGTH * 0.5, 0],
-  //   // [HULL_LENGTH * 0.45, -HULL_WIDTH * 0.1],
-  //   [HULL_LENGTH * 0.3, -HULL_WIDTH * 0.4],
-  //   [HULL_LENGTH * WIDE_POINT - HULL_LENGTH * 0.5, -HULL_WIDTH * 0.5],
-  //   [-HULL_LENGTH * 0.1, -HULL_WIDTH * 0.45],
-  //   [-HULL_LENGTH * 0.3, -HULL_WIDTH * 0.3],
-  //   [-HULL_LENGTH * 0.5, 0],
-  // ];
   let hull = draw(HullCurve1.startPoint)
     .cubicBezierCurveTo(HullCurve1.endPoint, HullCurve1.startControlPoint, HullCurve1.endControlPoint)
     .cubicBezierCurveTo(HullCurve2.endPoint, HullCurve2.startControlPoint, HullCurve2.endControlPoint)
@@ -94,16 +79,22 @@ function main({ draw, drawEllipse, drawCircle, makeSphere }, {}) {
 
   frontFin = frontFin.cut(frontNotch);
 
-  let backFin = drawEllipse(FIN_LENGTH, FIN_WIDTH);
-  backFin = backFin.sketchOnPlane().extrude(-(FIN_HEIGHT + 5), { extrusionProfile: { profile: "linear", endFactor: FIN_SLOPE } });
-  backFin = backFin.translate([BACK_FIN_OFFSET, 0, 5]);
+  // let backFin = drawEllipse(FIN_LENGTH, FIN_WIDTH);
+  // backFin = backFin.sketchOnPlane().extrude(-(FIN_HEIGHT + 5), { extrusionProfile: { profile: "linear", endFactor: FIN_SLOPE } });
+  // backFin = backFin.rotate(-10, [0, 0, 0], [0, 1, 0]).translate([BACK_FIN_OFFSET, 0, 5]);
 
-  // let dummyProp = drawCircle(PROP_RADIUS);
-  // dummyProp = dummyProp.sketchOnPlane("YZ");
-  // dummyProp = dummyProp.extrude(PROP_THICKNESS).fillet(3);
+  let backFinTop = drawEllipse(FIN_LENGTH, FIN_WIDTH).sketchOnPlane();
+  let backFinBottom = drawEllipse(FIN_LENGTH * 0.66, FIN_WIDTH * 0.5)
+    .translate(FIN_LENGTH * 0.66 * 0.5)
+    .sketchOnPlane("XY", -(FIN_HEIGHT + 5));
+  let backFin = backFinTop.loftWith(backFinBottom).translate([BACK_FIN_OFFSET, 0, 5]);
 
-  // const backPosition = HULL_LENGTH * 0.5 - PROP_THICKNESS / 2;
-  // dummyProp = dummyProp.translate([backPosition, 0, BORE_HEIGHT]);
+  let dummyProp = drawCircle(PROP_RADIUS);
+  dummyProp = dummyProp.sketchOnPlane("YZ");
+  dummyProp = dummyProp.extrude(PROP_THICKNESS).fillet(3);
+
+  const backPosition = BACK_FIN_OFFSET + FIN_LENGTH + 2;
+  dummyProp = dummyProp.translate([backPosition, 0, -BORE_HEIGHT]);
 
   let boreDriller = drawCircle(BORE_RADIUS);
   boreDriller = boreDriller.sketchOnPlane("YZ");
@@ -122,7 +113,7 @@ function main({ draw, drawEllipse, drawCircle, makeSphere }, {}) {
   // dummyProp = dummyProp.cut(boreDriller);
 
   // const components = [hull, ...controlPoints];
-  const components = [boatBody, boreDriller];
+  const components = [boatBody, boreDriller, dummyProp];
 
   console.log("model updated at ", new Date().getTime());
 
