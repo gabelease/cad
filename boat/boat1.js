@@ -6,7 +6,7 @@ const WIDE_POINT = 0.66;
 
 const HullCurve1 = {
   startPoint: [0, 0],
-  startControlPoint: [HULL_LENGTH * 0.3, HULL_WIDTH * 0.2],
+  startControlPoint: [HULL_LENGTH * 0.4, HULL_WIDTH * 0.2],
   endPoint: [HULL_LENGTH * WIDE_POINT, HULL_WIDTH * 0.5],
   endControlPoint: [HULL_LENGTH * 0.4, HULL_WIDTH * 0.5],
 };
@@ -22,9 +22,9 @@ const HULL_HEIGHT = 15;
 
 const FIN_LENGTH = 15;
 const FIN_WIDTH = 4;
-const FIN_HEIGHT = -30;
+const FIN_HEIGHT = 30;
 
-const FRONT_FIN_OFFSET = HULL_LENGTH * -0.25;
+const FRONT_FIN_OFFSET = HULL_LENGTH * 0.25;
 const BACK_FIN_OFFSET = HULL_LENGTH * 0.35;
 
 const PROP_SCALE = 0.66;
@@ -64,25 +64,25 @@ function main({ draw, drawEllipse, drawCircle }, {}) {
     .cubicBezierCurveTo(HullCurve2.endPoint, HullCurve2.startControlPoint, HullCurve2.endControlPoint)
     .closeWithMirror();
 
-  const controlPoints = [
-    drawCircle(1.5).translate(HullCurve1.startPoint),
-    drawCircle(1.5).translate(HullCurve1.startControlPoint),
-    drawCircle(1.5).translate(HullCurve1.endControlPoint),
-    drawCircle(1.5).translate(HullCurve1.endPoint),
-    drawCircle(1.5).translate(HullCurve2.startControlPoint),
-    drawCircle(1.5).translate(HullCurve2.endControlPoint),
-    drawCircle(1.5).translate(HullCurve2.endPoint),
-  ];
+  // const controlPoints = [
+  //   drawCircle(1.5).translate(HullCurve1.startPoint),
+  //   drawCircle(1.5).translate(HullCurve1.startControlPoint),
+  //   drawCircle(1.5).translate(HullCurve1.endControlPoint),
+  //   drawCircle(1.5).translate(HullCurve1.endPoint),
+  //   drawCircle(1.5).translate(HullCurve2.startControlPoint),
+  //   drawCircle(1.5).translate(HullCurve2.endControlPoint),
+  //   drawCircle(1.5).translate(HullCurve2.endPoint),
+  // ];
 
-  // hull = hull.sketchOnPlane().extrude(HULL_HEIGHT);
+  hull = hull.sketchOnPlane().extrude(HULL_HEIGHT);
 
   // hull = hull.fillet(1, (e) => e.inDirection("Z"));
 
-  // hull = hull.fillet(1.9, (e) => e.inPlane("XY", 0));
+  hull = hull.fillet(5, (e) => e.inPlane("XY", 0));
 
-  // let frontFin = drawEllipse(FIN_LENGTH, FIN_WIDTH);
-  // frontFin = frontFin.sketchOnPlane().extrude(FIN_HEIGHT);
-  // frontFin = frontFin.translate([FRONT_FIN_OFFSET, 0]);
+  let frontFin = drawEllipse(FIN_LENGTH, FIN_WIDTH);
+  frontFin = frontFin.sketchOnPlane().extrude(-(FIN_HEIGHT + 5));
+  frontFin = frontFin.translate([FRONT_FIN_OFFSET, 0, 5]);
 
   // let backFin = drawEllipse(FIN_LENGTH, FIN_WIDTH);
   // backFin = backFin.sketchOnPlane().extrude(FIN_HEIGHT);
@@ -111,7 +111,8 @@ function main({ draw, drawEllipse, drawCircle }, {}) {
   // boatBody = boatBody.cut(boreDriller);
   // dummyProp = dummyProp.cut(boreDriller);
 
-  const components = [hull, ...controlPoints];
+  // const components = [hull, ...controlPoints];
+  const components = [hull, frontFin];
 
   console.log("model updated at ", new Date().getTime());
 

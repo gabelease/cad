@@ -18,6 +18,7 @@
   "homepage": "https://github.com/gabelease/cad#readme",
   "dependencies": {
     "replicad": "^0.20.0",
+    "step-to-json": "^3.0.0",
     "typescript": "^5.9.2"
   }
 }
