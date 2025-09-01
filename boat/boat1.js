@@ -24,8 +24,6 @@ const FIN_LENGTH = 15;
 const FIN_WIDTH = 4;
 const FIN_HEIGHT = 30;
 const FIN_SLOPE = 0.5;
-const FRONT_NOTCH_RADIUS = 4;
-const FRONT_NOTCH_OFFSET = 10;
 
 const FRONT_FIN_OFFSET = HULL_LENGTH * 0.25;
 const BACK_FIN_OFFSET = HULL_LENGTH * 0.85;
@@ -36,7 +34,11 @@ const PROP_DIAMETER = 60 * PROP_SCALE;
 const PROP_THICKNESS = 18 * PROP_SCALE;
 const PROP_RADIUS = PROP_DIAMETER / 2;
 
-const BORE_HEIGHT = FIN_HEIGHT * 0.8;
+const BORE_HEIGHT = FIN_HEIGHT * 0.85;
+const FRONT_NOTCH_RADIUS = 4;
+const FRONT_NOTCH_OFFSET = 2;
+const BACK_NOTCH_OFFSET = 6;
+const BACK_NOTCH_HEIGHT = 11;
 
 const BORE_DIAMETER = 3 * PROP_SCALE;
 const BORE_RADIUS = BORE_DIAMETER / 2;
@@ -68,9 +70,11 @@ function main({ draw, drawEllipse, drawCircle, makeSphere }, {}) {
 
   hull = hull.fillet(5, (e) => e.inPlane("XY", 0));
 
-  let frontFin = drawEllipse(FIN_LENGTH, FIN_WIDTH);
-  frontFin = frontFin.sketchOnPlane().extrude(-(FIN_HEIGHT + 5), { extrusionProfile: { profile: "linear", endFactor: FIN_SLOPE } });
-  frontFin = frontFin.translate([FRONT_FIN_OFFSET, 0, 5]);
+  let frontFinTop = drawEllipse(FIN_LENGTH, FIN_WIDTH).sketchOnPlane();
+  let frontFinBottom = drawEllipse(FIN_LENGTH * 0.5, FIN_WIDTH)
+    .translate(FIN_LENGTH * 0.5)
+    .sketchOnPlane("XY", -(FIN_HEIGHT + 5));
+  let frontFin = frontFinTop.loftWith(frontFinBottom).translate([FRONT_FIN_OFFSET, 0, 5]);
 
   let frontNotch = drawCircle(FRONT_NOTCH_RADIUS)
     .sketchOnPlane("XZ")
@@ -84,10 +88,21 @@ function main({ draw, drawEllipse, drawCircle, makeSphere }, {}) {
   // backFin = backFin.rotate(-10, [0, 0, 0], [0, 1, 0]).translate([BACK_FIN_OFFSET, 0, 5]);
 
   let backFinTop = drawEllipse(FIN_LENGTH, FIN_WIDTH).sketchOnPlane();
-  let backFinBottom = drawEllipse(FIN_LENGTH * 0.66, FIN_WIDTH * 0.5)
-    .translate(FIN_LENGTH * 0.66 * 0.5)
+  let backFinBottom = drawEllipse(FIN_LENGTH * 0.5, FIN_WIDTH)
+    .translate(FIN_LENGTH * 0.5)
     .sketchOnPlane("XY", -(FIN_HEIGHT + 5));
   let backFin = backFinTop.loftWith(backFinBottom).translate([BACK_FIN_OFFSET, 0, 5]);
+
+  let backNotch = draw()
+    .lineTo([-20, 0])
+    .lineTo([-20, -20])
+    .lineTo([0, -20])
+    .lineTo([0, 0])
+    .close()
+    .fillet(3)
+    .sketchOnPlane("XZ")
+    .extrude(FIN_WIDTH * 4)
+    .translate([BACK_FIN_OFFSET + FIN_LENGTH - BACK_NOTCH_OFFSET, FIN_WIDTH * 2, -FIN_HEIGHT + BACK_NOTCH_HEIGHT]);
 
   let dummyProp = drawCircle(PROP_RADIUS);
   dummyProp = dummyProp.sketchOnPlane("YZ");
@@ -98,22 +113,30 @@ function main({ draw, drawEllipse, drawCircle, makeSphere }, {}) {
 
   let boreDriller = drawCircle(BORE_RADIUS);
   boreDriller = boreDriller.sketchOnPlane("YZ");
-  boreDriller = boreDriller.extrude(HULL_LENGTH * 0.3);
+  boreDriller = boreDriller.extrude(HULL_LENGTH);
   boreDriller = boreDriller.translate([HULL_LENGTH * 0.5, 0, -BORE_HEIGHT]);
 
-  // let rubberBandPropClip = drawCircle(SHAFT_RADIUS);
-  // rubberBandPropClip = rubberBandPropClip.sketchOnPlane("YZ");
-  // rubberBandPropClip = rubberBandPropClip.extrude(FIN_LENGTH);
+  let rubberBandPropClip = drawCircle(SHAFT_RADIUS);
+  rubberBandPropClip = rubberBandPropClip.sketchOnPlane("YZ");
+  rubberBandPropClip = rubberBandPropClip
+    .extrude(-FIN_LENGTH)
+    .fillet(SHAFT_RADIUS, (e) => e.inPlane("YZ", -FIN_LENGTH))
+    .fillet(SHAFT_RADIUS * 0.5, (e) => e.inPlane("YZ", 0));
+  // let clipHole = drawCircle(BORE_RADIUS)
+  //   .sketchOnPlane("YZ")
+  //   .extrude(-FIN_LENGTH * 1);
+  // rubberBandPropClip = rubberBandPropClip.cut(clipHole);
+
   // const shaftPosition = BACK_FIN_OFFSET - FIN_LENGTH * 3;
-  // rubberBandPropClip = rubberBandPropClip.translate([shaftPosition, 0, BORE_HEIGHT]);
+  rubberBandPropClip = rubberBandPropClip.translate([BACK_FIN_OFFSET + FIN_LENGTH - BACK_NOTCH_OFFSET, 0, -BORE_HEIGHT]).cut(boreDriller);
   // rubberBandPropClip = rubberBandPropClip.fillet(SHAFT_RADIUS, (e) => e.inPlane("YZ", shaftPosition));
 
   let boatBody = hull.fuse(frontFin).fuse(backFin);
-  // boatBody = boatBody.cut(boreDriller);
-  // dummyProp = dummyProp.cut(boreDriller);
+  boatBody = boatBody.cut(boreDriller).cut(backNotch);
+  dummyProp = dummyProp.cut(boreDriller);
 
   // const components = [hull, ...controlPoints];
-  const components = [boatBody, boreDriller, dummyProp];
+  const components = [boatBody, rubberBandPropClip];
 
   console.log("model updated at ", new Date().getTime());
 
