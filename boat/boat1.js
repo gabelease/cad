@@ -54,16 +54,6 @@ function main({ draw, drawEllipse, drawCircle, makeSphere }, {}) {
     .cubicBezierCurveTo(HullCurve2.endPoint, HullCurve2.startControlPoint, HullCurve2.endControlPoint)
     .closeWithMirror();
 
-  // const controlPoints = [
-  //   drawCircle(1.5).translate(HullCurve1.startPoint),
-  //   drawCircle(1.5).translate(HullCurve1.startControlPoint),
-  //   drawCircle(1.5).translate(HullCurve1.endControlPoint),
-  //   drawCircle(1.5).translate(HullCurve1.endPoint),
-  //   drawCircle(1.5).translate(HullCurve2.startControlPoint),
-  //   drawCircle(1.5).translate(HullCurve2.endControlPoint),
-  //   drawCircle(1.5).translate(HullCurve2.endPoint),
-  // ];
-
   hull = hull.sketchOnPlane().extrude(HULL_HEIGHT);
 
   // hull = hull.fillet(1, (e) => e.inDirection("Z"));
@@ -82,10 +72,6 @@ function main({ draw, drawEllipse, drawCircle, makeSphere }, {}) {
     .translate([FRONT_FIN_OFFSET - FRONT_NOTCH_OFFSET, -5, -BORE_HEIGHT]);
 
   frontFin = frontFin.cut(frontNotch);
-
-  // let backFin = drawEllipse(FIN_LENGTH, FIN_WIDTH);
-  // backFin = backFin.sketchOnPlane().extrude(-(FIN_HEIGHT + 5), { extrusionProfile: { profile: "linear", endFactor: FIN_SLOPE } });
-  // backFin = backFin.rotate(-10, [0, 0, 0], [0, 1, 0]).translate([BACK_FIN_OFFSET, 0, 5]);
 
   let backFinTop = drawEllipse(FIN_LENGTH, FIN_WIDTH).sketchOnPlane();
   let backFinBottom = drawEllipse(FIN_LENGTH * 0.5, FIN_WIDTH)
@@ -126,11 +112,6 @@ function main({ draw, drawEllipse, drawCircle, makeSphere }, {}) {
   let rubberBandClipHole = drawCircle(2).sketchOnPlane("XY").extrude(20).translate([-15, 0, -10]);
   rubberBandPropClip = rubberBandPropClip.cut(rubberBandClipHole);
 
-  // let clipHole = drawCircle(BORE_RADIUS)
-  //   .sketchOnPlane("YZ")
-  //   .extrude(-FIN_LENGTH * 1);
-  // rubberBandPropClip = rubberBandPropClip.cut(clipHole);
-
   const shaftPosition = BACK_FIN_OFFSET - FIN_LENGTH * 3;
   rubberBandPropClip = rubberBandPropClip.translate([BACK_FIN_OFFSET + FIN_LENGTH - BACK_NOTCH_OFFSET, 0, -BORE_HEIGHT]).cut(boreDriller);
   // rubberBandPropClip = rubberBandPropClip.fillet(SHAFT_RADIUS, (e) => e.inPlane("YZ", shaftPosition));
@@ -140,7 +121,7 @@ function main({ draw, drawEllipse, drawCircle, makeSphere }, {}) {
   dummyProp = dummyProp.cut(boreDriller);
 
   // const components = [hull, ...controlPoints];
-  const components = [rubberBandPropClip];
+  const components = [rubberBandPropClip, boatBody, dummyProp];
   console.log("model updated at ", new Date().getTime());
 
   return components;
