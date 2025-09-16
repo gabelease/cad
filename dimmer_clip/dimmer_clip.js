@@ -8,6 +8,7 @@ const defaultParams = {
   cordHeight: 3,
   cordWidth: 6,
   cordLength: 15,
+  cordBottomOffset: 2,
 };
 
 /** @typedef { typeof import("replicad") } replicadLib */
@@ -33,6 +34,7 @@ function main(
     cordHeight,
     cordWidth,
     cordLength,
+    cordBottomOffset,
   }
 ) {
   const bottomDelta = topLength - bottomLength;
@@ -72,12 +74,12 @@ function main(
     .fillet(cordHeight / 2 - 0.01)
     .sketchOnPlane("XZ")
     .extrude(cordLength)
-    .translate([topWidth / 2 - cordWidth / 2, 0, 0]);
+    .translate([topWidth / 2 - cordWidth / 2, 10, cordBottomOffset]);
 
   let dimmer = bottom
     .fuse(top)
     // .fuse(cordStub)
-    // .fillet(filletRadius)
+    .fillet(filletRadius)
     .translate([0, 0, bodyHeight]);
   // console.log("bottom", bottom);
 
