@@ -1,10 +1,13 @@
 const defaultParams = {
   topLength: 100,
-  topWidth: 30,
   bottomLength: 90,
-  height: 20,
+  topWidth: 30,
+  bodyHeight: 20,
   topHeight: 5,
   filletRadius: 2,
+  cordHeight: 3,
+  cordWidth: 6,
+  cordLength: 15,
 };
 
 /** @typedef { typeof import("replicad") } replicadLib */
@@ -20,7 +23,17 @@ function main(
     sketchRectangle,
     drawFaceOutline,
   },
-  { topLength, topWidth, bottomLength, height, topHeight, filletRadius }
+  {
+    topLength,
+    topWidth,
+    bottomLength,
+    bodyHeight,
+    topHeight,
+    filletRadius,
+    cordHeight,
+    cordWidth,
+    cordLength,
+  }
 ) {
   const bottomDelta = topLength - bottomLength;
   const bottomWidth = topWidth - bottomDelta;
@@ -43,18 +56,34 @@ function main(
     .lineTo([0, bottomLength])
     .close()
     .translate([bottomDelta / 2, bottomDelta / 2])
-    .sketchOnPlane("XY", -height);
+    .sketchOnPlane("XY", -bodyHeight);
 
   // let bottomSketch = sketchRectangle(bottomWidth, d.bottomLength, "XY");
   // let bottomSketch = drawFaceOutline((f) => f.inPlane("XY", 0));
 
   let bottom = topSketch.loftWith(bottomSketch);
-  let dimmer = bottom.fuse(top).fillet(filletRadius).translate([0, 0, height]);
+
+  // Create cord stub on XZ plane
+  let cordStub = draw()
+    .lineTo([cordWidth, 0])
+    .lineTo([cordWidth, cordHeight])
+    .lineTo([0, cordHeight])
+    .close()
+    .fillet(cordHeight / 2 - 0.01)
+    .sketchOnPlane("XZ")
+    .extrude(cordLength)
+    .translate([topWidth / 2 - cordWidth / 2, 0, 0]);
+
+  let dimmer = bottom
+    .fuse(top)
+    // .fuse(cordStub)
+    // .fillet(filletRadius)
+    .translate([0, 0, bodyHeight]);
   // console.log("bottom", bottom);
 
   // bottom = drawCircle(defaultParams.bottomRadius).sketchOnPlane("XY").extrude(defaultParams.height);
 
-  const components = [dimmer];
+  const components = [cordStub, dimmer];
 
   return components;
 }
