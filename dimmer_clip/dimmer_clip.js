@@ -5,10 +5,11 @@ const defaultParams = {
   bodyHeight: 20,
   topHeight: 5,
   filletRadius: 2,
-  cordHeight: 3,
+  cordHeight: 20,
   cordWidth: 6,
   cordLength: 30,
-  cordBottomOffset: 2,
+  cordBottomOffset: 5,
+  cordFillet: 2,
   baseOffsetX: 10,
   baseOffsetY: 5,
   baseFillet: 5,
@@ -42,6 +43,7 @@ function main(
     cordWidth,
     cordLength,
     cordBottomOffset,
+    cordFillet,
     baseOffsetX,
     baseOffsetY,
     baseFillet,
@@ -85,7 +87,7 @@ function main(
     .lineTo([cordWidth, cordHeight])
     .lineTo([0, cordHeight])
     .close()
-    .fillet(cordHeight / 2 - 0.01)
+    .fillet(cordFillet)
     .sketchOnPlane("XZ")
     .extrude(cordLength)
     .translate([topWidth / 2 - cordWidth / 2, 10, cordBottomOffset]);
@@ -149,8 +151,10 @@ function main(
 
   base = base.cut(rightCountersink);
   base = base.cut(leftCountersink);
+  base = base.cut(dimmer);
+  base = base.cut(cordStub);
 
-  const components = [base, dimmer, cordStub];
+  const components = [base];
 
   return components;
 }
