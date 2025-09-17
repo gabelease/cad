@@ -15,6 +15,7 @@ const defaultParams = {
   baseHeight: 20,
   baseThickness: 2,
   holeDiameter: 4,
+  countersinkDiameter: 8,
 };
 
 /** @typedef { typeof import("replicad") } replicadLib */
@@ -47,6 +48,7 @@ function main(
     baseHeight,
     baseThickness,
     holeDiameter,
+    countersinkDiameter,
   }
 ) {
   const bottomDelta = topLength - bottomLength;
@@ -131,6 +133,22 @@ function main(
 
   base = base.cut(rightHole);
   base = base.cut(leftHole);
+
+  // Create countersink holes at same positions, starting from base height and extruding down 3mm
+  let rightCountersink = drawCircle(countersinkDiameter / 2)
+    .translate([xCenter, yCenter])
+    .translate([holeXOffset])
+    .sketchOnPlane("XY", baseHeight - baseThickness)
+    .extrude(-3);
+
+  let leftCountersink = drawCircle(countersinkDiameter / 2)
+    .translate([xCenter, yCenter])
+    .translate([-holeXOffset])
+    .sketchOnPlane("XY", baseHeight - baseThickness)
+    .extrude(-3);
+
+  base = base.cut(rightCountersink);
+  base = base.cut(leftCountersink);
 
   const components = [base, dimmer, cordStub];
 
