@@ -7,8 +7,14 @@ const defaultParams = {
   filletRadius: 2,
   cordHeight: 3,
   cordWidth: 6,
-  cordLength: 15,
+  cordLength: 30,
   cordBottomOffset: 2,
+  baseOffsetX: 10,
+  baseOffsetY: 5,
+  baseFillet: 5,
+  baseHeight: 20,
+  baseThickness: 2,
+  holeDiameter: 4,
 };
 
 /** @typedef { typeof import("replicad") } replicadLib */
@@ -35,6 +41,12 @@ function main(
     cordWidth,
     cordLength,
     cordBottomOffset,
+    baseOffsetX,
+    baseOffsetY,
+    baseFillet,
+    baseHeight,
+    baseThickness,
+    holeDiameter,
   }
 ) {
   const bottomDelta = topLength - bottomLength;
@@ -85,7 +97,42 @@ function main(
 
   // bottom = drawCircle(defaultParams.bottomRadius).sketchOnPlane("XY").extrude(defaultParams.height);
 
-  const components = [cordStub, dimmer];
+  // Create base rectangle on XY-plane, with padding extending beyond top sketch
+  const baseWidth = topWidth + 2 * baseOffsetX;
+  const baseLength = topLength + 2 * baseOffsetY;
+
+  let baseSketch = draw()
+    .lineTo([baseWidth, 0])
+    .lineTo([baseWidth, baseLength])
+    .lineTo([0, baseLength])
+    .close()
+    .fillet(baseFillet)
+    .translate([-baseOffsetX, -baseOffsetY])
+    .sketchOnPlane("XY");
+
+  let base = baseSketch.extrude(baseHeight).translate([0, 0, -baseThickness]);
+
+  const xCenter = topWidth / 2;
+  const yCenter = baseLength / 2;
+
+  const holeXOffset = topWidth / 2 + baseOffsetX / 2;
+
+  let rightHole = drawCircle(holeDiameter / 2)
+    .translate([xCenter, yCenter])
+    .translate([holeXOffset])
+    .sketchOnPlane("XY", -baseThickness * 1.5)
+    .extrude(baseHeight * 1.5);
+
+  let leftHole = rightHole.clone().translate([-(holeXOffset * 2), 0, 0]);
+
+  // let mirroredHole = singleHole.mirror([1, 0, 0], [0, holeYCenter, 0], "plane");
+
+  // let holes = singleHole.fuse(mirroredHole);
+
+  base = base.cut(rightHole);
+  base = base.cut(leftHole);
+
+  const components = [base, dimmer, cordStub];
 
   return components;
 }
