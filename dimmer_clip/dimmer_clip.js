@@ -18,7 +18,7 @@ const defaultParams = {
   holeDiameter: 4,
   countersinkDiameter: 8,
   lidWallThickness: 2,
-  lidFitOffset: 0.25,
+  fitOffset: 0.25,
   lidHeightOffset: 5,
   lidFillet: 5,
 };
@@ -35,6 +35,7 @@ function main(
     basicFaceExtrusion,
     sketchRectangle,
     drawFaceOutline,
+    makeOffset,
   },
   {
     topLength,
@@ -56,7 +57,7 @@ function main(
     holeDiameter,
     countersinkDiameter,
     lidWallThickness,
-    lidFitOffset,
+    fitOffset,
     lidHeightOffset,
     lidFillet,
   }
@@ -105,6 +106,9 @@ function main(
     // .fuse(cordStub)
     .fillet(filletRadius)
     .translate([0, 0, bodyHeight]);
+
+  // let dimmerCut = makeOffset(dimmer.clone(), fitOffset);
+  // let dimmerCut = dimmer.clone().scale(1.01);
   // console.log("bottom", bottom);
 
   // bottom = drawCircle(defaultParams.bottomRadius).sketchOnPlane("XY").extrude(defaultParams.height);
@@ -123,6 +127,8 @@ function main(
     .sketchOnPlane("XY");
 
   let base = baseSketch.extrude(baseHeight).translate([0, 0, -baseThickness]);
+
+  let baseCut = makeOffset(base, fitOffset);
 
   const xCenter = topWidth / 2;
   const yCenter = baseLength / 2;
@@ -157,13 +163,16 @@ function main(
     .sketchOnPlane("XY", baseHeight - baseThickness)
     .extrude(-3);
 
-  base = base.cut(rightCountersink);
-  base = base.cut(leftCountersink);
-  base = base.cut(dimmer);
-  base = base.cut(cordStub);
+  base = base
+    .cut(rightCountersink)
+    .cut(leftCountersink)
+    .cut(dimmer)
+    .cut(cordStub);
+  // base = base.cut(dimmer);
+  // base = base.cut(cordStub);
 
   // Create lid by offsetting base drawing outward
-  const lidOffset = lidWallThickness + lidFitOffset;
+  const lidOffset = lidWallThickness + fitOffset;
   const lidHeight = bodyHeight + topHeight + lidHeightOffset + baseThickness;
 
   let lidSketch = draw()
@@ -179,9 +188,12 @@ function main(
   let lid = lidSketch
     .extrude(lidHeight)
     .translate([0, 0, -baseThickness])
-    .fillet(lidFillet, (e) => e.inPlane("XY", lidHeight - baseThickness));
+    .fillet(lidFillet, (e) => e.inPlane("XY", lidHeight - baseThickness))
+    .cut(baseCut)
+    .cut(dimmer);
 
-  const components = [base, lid];
+  // const components = [lid, base];
+  const components = [lid];
 
   return components;
 }
