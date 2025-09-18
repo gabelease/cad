@@ -10,13 +10,17 @@ const defaultParams = {
   cordLength: 30,
   cordBottomOffset: 5,
   cordFillet: 2,
-  baseOffsetX: 10,
+  baseOffsetX: 15,
   baseOffsetY: 5,
   baseFillet: 5,
   baseHeight: 20,
   baseThickness: 2,
   holeDiameter: 4,
   countersinkDiameter: 8,
+  lidWallThickness: 2,
+  lidFitOffset: 0.25,
+  lidHeightOffset: 5,
+  lidFillet: 5,
 };
 
 /** @typedef { typeof import("replicad") } replicadLib */
@@ -51,6 +55,10 @@ function main(
     baseThickness,
     holeDiameter,
     countersinkDiameter,
+    lidWallThickness,
+    lidFitOffset,
+    lidHeightOffset,
+    lidFillet,
   }
 ) {
   const bottomDelta = topLength - bottomLength;
@@ -154,7 +162,26 @@ function main(
   base = base.cut(dimmer);
   base = base.cut(cordStub);
 
-  const components = [base];
+  // Create lid by offsetting base drawing outward
+  const lidOffset = lidWallThickness + lidFitOffset;
+  const lidHeight = bodyHeight + topHeight + lidHeightOffset + baseThickness;
+
+  let lidSketch = draw()
+    .lineTo([baseWidth, 0])
+    .lineTo([baseWidth, baseLength])
+    .lineTo([0, baseLength])
+    .close()
+    .fillet(baseFillet)
+    .translate([-baseOffsetX, -baseOffsetY])
+    .offset(lidOffset)
+    .sketchOnPlane("XY");
+
+  let lid = lidSketch
+    .extrude(lidHeight)
+    .translate([0, 0, -baseThickness])
+    .fillet(lidFillet, (e) => e.inPlane("XY", lidHeight - baseThickness));
+
+  const components = [base, lid];
 
   return components;
 }
