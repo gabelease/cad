@@ -21,6 +21,9 @@ const defaultParams = {
   fitOffset: 0.25,
   lidHeightOffset: 5,
   lidFillet: 5,
+  sliderHoleWidth: 20,
+  sliderHoleLength: 50,
+  sliderHoleFillet: 5,
 };
 
 /** @typedef { typeof import("replicad") } replicadLib */
@@ -60,6 +63,9 @@ function main(
     fitOffset,
     lidHeightOffset,
     lidFillet,
+    sliderHoleWidth,
+    sliderHoleLength,
+    sliderHoleFillet,
   }
 ) {
   const bottomDelta = topLength - bottomLength;
@@ -191,6 +197,21 @@ function main(
     .fillet(lidFillet, (e) => e.inPlane("XY", lidHeight - baseThickness))
     .cut(baseCut)
     .cut(dimmer);
+
+  let sliderHole = draw()
+    .lineTo([sliderHoleWidth, 0])
+    .lineTo([sliderHoleWidth, sliderHoleLength])
+    .lineTo([0, sliderHoleLength])
+    .close()
+    .fillet(sliderHoleFillet)
+    .translate([xCenter, yCenter])
+    .translate([-sliderHoleWidth / 2, -sliderHoleLength / 2])
+    .sketchOnPlane("XY")
+    .extrude(baseHeight * 3);
+
+  lid = lid
+    .cut(sliderHole)
+    .fillet(lidFillet, (e) => e.inPlane("XY", lidHeight - baseThickness));
 
   // const components = [lid, base];
   const components = [lid];
