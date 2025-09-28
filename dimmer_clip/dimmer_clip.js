@@ -5,7 +5,7 @@ const defaultParams = {
   bodyHeight: 20,
   topHeight: 5,
   filletRadius: 2,
-  cordHeight: 20,
+  cordHeight: 5,
   cordWidth: 6,
   cordLength: 30,
   cordBottomOffset: 5,
@@ -97,15 +97,18 @@ function main(
   let bottom = topSketch.loftWith(bottomSketch);
 
   // Create cord stub on XZ plane
-  let cordStub = draw()
+  const tall = bodyHeight * 1;
+  let baseCordSlot = draw()
     .lineTo([cordWidth, 0])
-    .lineTo([cordWidth, cordHeight])
-    .lineTo([0, cordHeight])
+    .lineTo([cordWidth, tall])
+    .lineTo([0, tall])
     .close()
     .fillet(cordFillet)
     .sketchOnPlane("XZ")
     .extrude(cordLength)
     .translate([topWidth / 2 - cordWidth / 2, 10, cordBottomOffset]);
+
+  let lidCordSlot = baseCordSlot.clone().translate([0, 0, -tall + cordHeight]);
 
   let dimmer = bottom
     .fuse(top)
@@ -173,7 +176,7 @@ function main(
     .cut(rightCountersink)
     .cut(leftCountersink)
     .cut(dimmer)
-    .cut(cordStub);
+    .cut(baseCordSlot);
   // base = base.cut(dimmer);
   // base = base.cut(cordStub);
 
@@ -196,7 +199,8 @@ function main(
     .translate([0, 0, -baseThickness])
     .fillet(lidFillet, (e) => e.inPlane("XY", lidHeight - baseThickness))
     .cut(baseCut)
-    .cut(dimmer);
+    .cut(dimmer)
+    .cut(lidCordSlot);
 
   let sliderHole = draw()
     .lineTo([sliderHoleWidth, 0])
@@ -214,7 +218,8 @@ function main(
     .fillet(lidFillet, (e) => e.inPlane("XY", lidHeight - baseThickness));
 
   // const components = [lid, base];
-  const components = [lid];
+  const components = [lid, base];
+  // const components = [baseCordSlot, lidCordSlot];
 
   return components;
 }
